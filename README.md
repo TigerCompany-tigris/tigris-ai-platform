@@ -19,23 +19,22 @@ Install Java 1.7 or up
     sudo yum install gcc-c++ java-1.8.0-openjdk-devel.x86_64 python36u python36u-libs python36u-devel python36u-pip</code></pre>
 
 2. 필수 패키지 설치
-  * 가상화 처리시
-    <pre><code>설치 : python3 -m venv {가상환경명}
-    사용 : source {가상환경명}/bin/activate
-    </code></pre>
-      
-    <pre><code>pip3 install cython, jpype1, sklearn, scipy, gensim, flask_restful, konlpy
-    가상환경에서 설치시: pip install cython, jpype1, sklearn, scipy, gensim, flask_restful, konlpy
-    </code></pre>
+* 가상화 처리시
+<pre><code>설치 : python3 -m venv {가상환경명}
+사용 : source {가상환경명}/bin/activate
+</code></pre>
+<pre><code>pip3 install cython, jpype1, sklearn, scipy, gensim, flask_restful, konlpy
+가상환경에서 설치시: pip install cython, jpype1, sklearn, scipy, gensim, flask_restful, konlpy
+</code></pre>
 
 3. 프로젝트 다운로드
-  <pre><code>git clone https://github.com/TigerCompany-tigris/tigris-ai-platform.git
-  </code></pre>
-
+```bash
+git clone https://github.com/TigerCompany-tigris/tigris-ai-platform.git
+```
 4. 사용 가이드
-  * 환경설정
-  
-  * 서버 구동
-  <pre><code> </pre></code>
-  * API 호출
+* 환경설정
+* 서버 구동
+```bash
+```
+* API 호출
   
