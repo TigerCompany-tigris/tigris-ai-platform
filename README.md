@@ -15,31 +15,31 @@ Install Java 1.7 or up
     sudo apt-get install g++ openjdk-8-jdk python3-dev</code></pre>
     ```
   * centos
-  ```bash
-sudo yum install -y https://centos7.iuscommunity.org/ius-release.rpm
-sudo yum install gcc-c++ java-1.8.0-openjdk-devel.x86_64 python36u python36u-libs python36u-devel python36u-pip
-```
+    ```bash
+    sudo yum install -y https://centos7.iuscommunity.org/ius-release.rpm
+    sudo yum install gcc-c++ java-1.8.0-openjdk-devel.x86_64 python36u python36u-libs python36u-devel python36u-pip
+    ```
 
 2. 필수 패키지 설치
   * 가상화 처리시
+    ```bash
+    설치 : python3 -m venv {가상환경명}
+    사용 : source {가상환경명}/bin/activate
+    ```
+
   ```bash
-설치 : python3 -m venv {가상환경명}
-사용 : source {가상환경명}/bin/activate
+  pip3 install cython, jpype1, sklearn, scipy, gensim, flask_restful, konlpy
+  가상환경에서 설치시: pip install cython, jpype1, sklearn, scipy, gensim, flask_restful, konlpy
   ```
 
-  ```bash
-pip3 install cython, jpype1, sklearn, scipy, gensim, flask_restful, konlpy
-가상환경에서 설치시: pip install cython, jpype1, sklearn, scipy, gensim, flask_restful, konlpy
-```
-
 3. 프로젝트 다운로드
-```bash
-git clone https://github.com/TigerCompany-tigris/tigris-ai-platform.git
-```
+  ```bash
+  git clone https://github.com/TigerCompany-tigris/tigris-ai-platform.git
+  ```
 4. 사용 가이드
   * 환경설정
   * 서버 구동
-  ```bash
-```
+    ```bash
+    ```
   * API 호출
   
