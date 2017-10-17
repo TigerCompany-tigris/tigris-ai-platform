@@ -1,20 +1,25 @@
 # -*- coding: utf-8 -*-
-import abc
-import re
-import numpy as np
-
 from flask_restful import Resource
 from collections import Counter
+from gensim import corpora, models
 from itertools import chain
-from flask import g
-from gensim import corpora
-from gensim import models
+
+import numpy as np
+import re
+
+_nlp = None
+
+word_pool = None
+word_filter = None
+word_relationship = None
+
+def get_nlp():
+    return nlp
+def set_nlp(v):
+    global nlp
+    nlp = v
 
 def cleaning(content_list):
-    """
-
-    :type content_list: list
-    """
     rtn = []
     for contents in content_list:
         # html 제거
@@ -52,12 +57,12 @@ def getTags(tags, result_count):
 
     return rtn
 
-def getTopics(text_lines, nwords, nlp, extends_nlp, reduces_nlp):
+def getTopics(text_lines, nwords):
     rtnList = []
 
     for data in text_lines:
         for d in data.split():
-            for tag, real_tag in extends_nlp:
+            for match_text, text in word_pool.get_extend_word_dict():
                 if len(rtnList) == nwords:
                     return rtnList
 
@@ -74,12 +79,11 @@ def getTopics(text_lines, nwords, nlp, extends_nlp, reduces_nlp):
     if len(rtnList) == nwords:
         return rtnList
 
-    def tag_generator(nlp, corpus):
+    def tag_generator(corpus):
         for data in corpus:
-            yield [p[0] for p in nlp.pos(data, stem=True, norm=False) if
-                   p[1] in ('Noun', 'ProperNoun') and len(p[0]) > 1 and p[0] not in reduces_nlp]
+            yield [p for p in nlp(data) if len(p) > 1 and p not in word_pool.get_reduce_word_list()]
 
-    tagList = [x for x in tag_generator(nlp, text_lines) if x]
+    tagList = [x for x in tag_generator(text_lines) if x]
     tagList = [list(filter(lambda tag: tag not in rtnList, tags)) for tags in tagList]
 
     if not tagList or not list(chain.from_iterable(tagList)):
@@ -91,7 +95,7 @@ def getTopics(text_lines, nwords, nlp, extends_nlp, reduces_nlp):
     tfidf_model_ko = models.TfidfModel(tf_ko)
     tfidf_ko = tfidf_model_ko[tf_ko]
 
-    np.random.seed(42)  # optional
+    np.random.seed(42)
     ntopics = len(text_lines)
     lda_ko = models.ldamodel.LdaModel(tfidf_ko, id2word=dictionary_ko, num_topics=ntopics, passes=1)
     topics = lda_ko.show_topics(num_topics=ntopics, num_words=5, formatted=False)
@@ -128,18 +132,6 @@ def getTopics(text_lines, nwords, nlp, extends_nlp, reduces_nlp):
     return rtnList
 
 class BaseApi(Resource):
-    def __init__(self, extends_nlp, reduces_nlp):
-        self.logger = g.logger
-        from konlpy.tag import Twitter
-        self._nlp = Twitter()
-        self._extends_nlp = extends_nlp
-        self._reduces_nlp = reduces_nlp
-
-    @staticmethod
-    @abc.abstractmethod
-    def url():
-        raise NotImplementedError()
-
     def cleaning(self, content_list):
         return cleaning(content_list)
 
@@ -147,5 +139,4 @@ class BaseApi(Resource):
         return getTags(tags, result_count)
 
     def getTopics(self, text_lines, nwords):
-        return getTopics(text_lines=text_lines, nwords=nwords, nlp=self._nlp,
-                         extends_nlp=self._extends_nlp, reduces_nlp=self._reduces_nlp)
+        return getTopics(text_lines, nwords)

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<properties>
+    <nlp-function method-path="util.nlp" function-name="nlp_twitter" />
+    <data-handler>
+        <word_pool class-path="util.data_handler" class-name="WordPool" />
+        <word_filter class-path="util.data_handler" class-name="WordFilter" />
+        <word_relationship class-path="util.data_handler" class-name="WordRelationship" />
+    </data-handler>
+    <api>
+        <class class-path="api.SearchTopics" class-name="SearchTopic" url="/searchTopic" />
+        <class class-path="api.TopicCloud" class-name="TopicCloud" url="/topicCloud" />
+        <class class-path="api.TopicNetwork" class-name="TopicNetwork" url="/topicNetwork" />
+    </api>
+</properties>
