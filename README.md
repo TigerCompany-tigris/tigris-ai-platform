@@ -28,8 +28,8 @@ Install Java 1.7 or up
     ```
 
   ```bash
-  pip3 install cython, jpype1, sklearn, scipy, gensim, flask_restful, konlpy
-  가상환경에서 설치시: pip install cython, jpype1, sklearn, scipy, gensim, flask_restful, konlpy
+  pip3 install cython jpype1 sklearn scipy gensim flask_restful konlpy
+  가상환경에서 설치시: pip install cython jpype1 sklearn scipy gensim flask_restful konlpy
   ```
 
 3. 프로젝트 다운로드
