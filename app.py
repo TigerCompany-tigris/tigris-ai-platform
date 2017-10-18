@@ -63,7 +63,7 @@ def main():
     config = ElementTree.parse('properties/config.xml')
 
     nlpprop = config.find('nlp-function')
-    mod = importlib.import_module(nlpprop.attrib['method-path'])
+    mod = importlib.import_module(nlpprop.attrib['package-path'])
     nlp = getattr(mod, nlpprop.attrib['function-name'])
 
     setattr(ba, 'set_nlp', nlp)
@@ -74,8 +74,8 @@ def main():
         attr = prop.attrib
         print(prop.tag)
 
-        mod = importlib.import_module(attr['class-path'])
-        cls = getattr(mod, attr['class-name'])
+        mod = importlib.import_module(attr['package-path'])
+        cls = getattr(mod, attr['package-name'])
 
         setattr(ba, prop.tag, cls)
 
@@ -83,7 +83,7 @@ def main():
 
     for prop in apiprop:
         attr = prop.attrib
-        mod = importlib.import_module(attr['class-path'])
+        mod = importlib.import_module(attr['package-path'])
         cls = getattr(mod, attr['class-name'])
 
         api.add_resource(cls, attr['url'])
