@@ -49,8 +49,8 @@ Install Java 1.7 or up
     python app.py
     ```
   * API 호출
-    '''bash
+    ```bash
     curl --data-ascii 'text=안녕하세요 저는 홍길동입니다. 잘되겠죠?' \
     http://127.0.0.1:8080/searchTopic \
     -H 'cache-control: no-cache'
-    '''
+    ```
