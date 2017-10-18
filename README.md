@@ -38,7 +38,7 @@ Install Java 1.7 or up
   ```
 4. 사용 가이드
   * 환경설정
-    [참고파일](tigris-ai-platform/properties/config.xml)
+    [참고파일](properties/config.xml)
     * nlp-function: 형태소 분석 결과를 반환하는 메소드정의
     * data-handler: 데이터 설정
       * word_pool: 워드 클라우드, 워드 네트워크에서 사용할 데이터를 반환하는 클래스 정의
