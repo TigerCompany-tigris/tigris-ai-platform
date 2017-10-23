@@ -50,7 +50,7 @@ Install Java 1.7 or up
     ```
   * API 호출
     ```bash
-    curl --data-ascii 'text=안녕하세요 저는 홍길동입니다. 잘되겠죠?' \
+    curl --data-ascii 'text=안녕 나는 홍길동이야. 반갑다. 친구야 또 뭐라고 써야할까' \
     http://127.0.0.1:8080/searchTopic \
     -H 'cache-control: no-cache'
     ```
