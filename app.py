@@ -8,7 +8,6 @@ from flask import Flask, request
 from flask_restful import Api
 
 from interface import BaseApi as ba
-from util.data_handler import *
 
 app = Flask(__name__)
 api = Api(app)
@@ -62,31 +61,27 @@ def main():
 
     config = ElementTree.parse('properties/config.xml')
 
-    nlpprop = config.find('nlp-function')
-    mod = importlib.import_module(nlpprop.attrib['package-path'])
-    nlp = getattr(mod, nlpprop.attrib['function-name'])
+    nlp_prop = config.find('nlp-handler')
+    mod = importlib.import_module(nlp_prop.attrib['package-path'])
+    nlp = getattr(mod, nlp_prop.attrib['method-name'])
+    setattr(ba, 'nlp', nlp)
 
-    setattr(ba, 'set_nlp', nlp)
+    data_prop = config.findall('data-handler/*')
 
-    dataprop = config.findall('data-handler/*')
-
-    for prop in dataprop:
-        attr = prop.attrib
-        print(prop.tag)
-
-        mod = importlib.import_module(attr['package-path'])
-        cls = getattr(mod, attr['package-name'])
-
-        setattr(ba, prop.tag, cls)
-
-    apiprop = config.findall('api/class')
-
-    for prop in apiprop:
+    for prop in data_prop:
         attr = prop.attrib
         mod = importlib.import_module(attr['package-path'])
         cls = getattr(mod, attr['class-name'])
+        setattr(ba, prop.tag, cls)
 
-        api.add_resource(cls, attr['url'])
+    api_prop = config.findall('api-handler/*')
+
+    for prop in api_prop:
+        attr = prop.attrib
+        mod = importlib.import_module(attr['package-path'])
+        cls = getattr(mod, attr['class-name'])
+        api.add_resource(cls, attr['service-url'])
+
 
 if __name__ == '__main__':
     main()

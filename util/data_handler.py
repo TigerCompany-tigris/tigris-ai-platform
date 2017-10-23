@@ -9,19 +9,20 @@ _reduceList = {}
 class WordFilter(object):
     isInitialization = False
 
-    def __init__(self):
+    @staticmethod
+    def init():
         if not WordFilter.isInitialization:
             db = sqlite3.connect('db/word_filter.db')
 
             with db:
-                self.createTable(db)
+                WordFilter.createTable(db)
 
                 cursor = db.cursor()
                 rv = cursor.execute('select * from extend_words')
                 global _extendDict
                 _extendDict = {x: y for x, y in rv}
 
-                rv = cursor.execute('select * from extend_words')
+                rv = cursor.execute('select * from reduce_words')
 
                 global _reduceList
                 _reduceList = [x for x in rv]
@@ -30,19 +31,24 @@ class WordFilter(object):
 
             WordFilter.isInitialization = True
 
-    def createTable(self, db):
+    @staticmethod
+    def createTable(db):
         with open('db/schema/word_filter.sql', encoding='utf-8', mode='r') as f:
             cursor = db.cursor()
             cursor.executescript(f.read())
             db.commit()
             cursor.close()
 
-    def get_extend_word_dict(self):
+    @staticmethod
+    def get_extend_word_dict():
+        if not WordFilter.isInitialization:
+            WordFilter.init()
         return _extendDict
 
-    def add_extend_word(self, match_text, text):
+    @staticmethod
+    def add_extend_word(match_text, text):
         with sqlite3.connect('db/word_filter.db') as db:
-            self.createTable(db)
+            WordFilter.createTable(db)
 
             cursor = db.cursor()
             rv = cursor.execute('insert or replace into extend_words values(:match_text, :text)',
@@ -52,14 +58,19 @@ class WordFilter(object):
             cursor.close()
 
             WordFilter.isInitialization = False
-            self.__init__()
+            WordFilter.init()
 
-    def get_reduce_word_list(self):
+    @staticmethod
+    def get_reduce_word_list():
+        if not WordFilter.isInitialization:
+            WordFilter.init()
+
         return _reduceList
 
-    def add_reduce_word(self, text):
+    @staticmethod
+    def add_reduce_word(text):
         with sqlite3.connect('db/word_filter.db') as db:
-            self.createTable(db)
+            WordFilter.createTable(db)
 
             cursor = db.cursor()
             rv = cursor.execute('insert or replace into reduce_words values(:text)', {'text': text})
@@ -68,7 +79,7 @@ class WordFilter(object):
             cursor.close()
 
             WordFilter.isInitialization = False
-            self.__init__()
+            WordFilter.init()
 
 
 class WordRelationship(object):

@@ -7,17 +7,10 @@ from itertools import chain
 import numpy as np
 import re
 
-_nlp = None
-
+nlp = None
 word_pool = None
 word_filter = None
 word_relationship = None
-
-def get_nlp():
-    return nlp
-def set_nlp(v):
-    global nlp
-    nlp = v
 
 def cleaning(content_list):
     rtn = []
@@ -62,26 +55,26 @@ def getTopics(text_lines, nwords):
 
     for data in text_lines:
         for d in data.split():
-            for match_text, text in word_pool.get_extend_word_dict():
+            for match_text, text in word_filter.get_extend_word_dict().items():
                 if len(rtnList) == nwords:
                     return rtnList
 
-                if d.lower() == tag.lower():
+                if d.lower() == match_text.lower():
                     isContinue = False
                     for rtn in rtnList:
-                        if real_tag in rtn:
+                        if text in rtn:
                             isContinue = True
                             break
 
                     if not isContinue:
-                        rtnList.append(real_tag)
+                        rtnList.append(text)
 
     if len(rtnList) == nwords:
         return rtnList
 
     def tag_generator(corpus):
         for data in corpus:
-            yield [p for p in nlp(data) if len(p) > 1 and p not in word_pool.get_reduce_word_list()]
+            yield [p for p in nlp(data) if len(p) > 1 and p not in word_filter.get_reduce_word_list()]
 
     tagList = [x for x in tag_generator(text_lines) if x]
     tagList = [list(filter(lambda tag: tag not in rtnList, tags)) for tags in tagList]
