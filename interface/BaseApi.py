@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
-from flask_restful import Resource
+import copy
+import numpy as np, re
+import re
 from collections import Counter
-from gensim import corpora, models
+from functools import wraps
 from itertools import chain
 
-import numpy as np
-import re
+from flask import request
+from flask_restful import Resource, reqparse
+from gensim import corpora, models
+
+from .DataApi import DataApi
 
 nlp = None
-word_pool = None
-word_filter = None
-word_relationship = None
+dataApi = None  # type: DataApi
 
-def cleaning(content_list):
+
+def cleaning(content_list, params=None):
     rtn = []
     for contents in content_list:
         # html 제거
@@ -32,12 +36,14 @@ def cleaning(content_list):
         # 영문 조사등 제거
         from nltk.corpus import stopwords
         from nltk.tokenize import word_tokenize
-        contents = ' '.join([word for word in word_tokenize(contents, language='english') if word.lower() not in set(stopwords.words('english'))])
+        contents = ' '.join([word for word in word_tokenize(contents, language='english') if
+                             word.lower() not in set(stopwords.words('english'))])
         rtn.append(contents)
 
     return rtn
 
-def getTags(tags, result_count):
+
+def getTags(tags, result_count, params=None):
     if not tags:
         return []
 
@@ -50,12 +56,13 @@ def getTags(tags, result_count):
 
     return rtn
 
-def getTopics(text_lines, nwords):
+
+def getTopics(text_lines, nwords, params=None):
     rtnList = []
 
     for data in text_lines:
         for d in data.split():
-            for match_text, text in word_filter.get_extend_word_dict().items():
+            for match_text, text in dataApi.WordFilter.get_extend_word_dict(params).items():
                 if len(rtnList) == nwords:
                     return rtnList
 
@@ -74,7 +81,7 @@ def getTopics(text_lines, nwords):
 
     def tag_generator(corpus):
         for data in corpus:
-            yield [p for p in nlp(data) if len(p) > 1 and p not in word_filter.get_reduce_word_list()]
+            yield [p for p in nlp(data) if len(p) > 1 and p not in dataApi.WordFilter.get_reduce_word_list(params)]
 
     tagList = [x for x in tag_generator(text_lines) if x]
     tagList = [list(filter(lambda tag: tag not in rtnList, tags)) for tags in tagList]
@@ -101,9 +108,9 @@ def getTopics(text_lines, nwords):
             for idx, obj in enumerate(topic[1]):
                 key, value = obj
                 if key in newDict:
-                    newDict[key] += (idx+1+value)
+                    newDict[key] += (idx + 1 + value)
                 else:
-                    newDict[key] = (idx+1+value)
+                    newDict[key] = (idx + 1 + value)
         return newDict
 
     rtn = sumTopic(topics)
@@ -124,12 +131,59 @@ def getTopics(text_lines, nwords):
 
     return rtnList
 
+
+def decorators(f):
+    @wraps(f)
+    def func_wrapper(*args, **kwargs):
+        if kwargs:
+            f.__self__.params.update(kwargs)
+        return f(*args)
+    return func_wrapper
+
 class BaseApi(Resource):
-    def cleaning(self, content_list):
-        return cleaning(content_list)
+    method_decorators = [decorators]
 
-    def getTags(self, tags, result_count=20):
-        return getTags(tags, result_count)
+    __default_params = {
+        'name': '',
+        'dest': '',
+        'default': '',
+        'type': str,
+        'required': False,
+        'action': 'store',
+        'help': ''
+    }
 
-    def getTopics(self, text_lines, nwords):
-        return getTopics(text_lines, nwords)
+    def __init__(self, parameters):
+        if request.method in parameters:
+            paramList = parameters[request.method]
+
+            def param_parser(default, param):
+                default.update({k: v for k, v in param.items() if v})
+                default['type'] = eval(default['type'])
+                default['required'] = bool(default['required'])
+                default['default'] = default['type'](default['default'])
+
+                return default
+
+            parser = reqparse.RequestParser()
+
+            for param in paramList:
+                parser.add_argument(**param_parser(BaseApi.__default_params.copy(), param))
+
+            self.params = parser.parse_args()
+
+    @staticmethod
+    def cleaning(content_list, params=None):
+        return cleaning(content_list, params)
+
+    @staticmethod
+    def getTags(tags, result_count, params=None):
+        return getTags(tags, result_count, params)
+
+    @staticmethod
+    def getTopics(text_lines, nwords, params=None):
+        return getTopics(text_lines, nwords, params)
+
+    @staticmethod
+    def getDataApi():
+        return dataApi

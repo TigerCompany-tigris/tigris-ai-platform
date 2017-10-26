@@ -1,104 +1,116 @@
 # -*- coding: utf-8 -*-
-
 import sqlite3
+import os
+from interface import DataApi
+from gensim.models import Word2Vec
 
-_extendDict = {}
-_reduceList = {}
+class WordFilter(DataApi.AbsWordFilter):
+    __dataFile = 'db/word_filter.db'
+    __schemaFile = 'db/schema/word_filter.sql'
 
+    __extendDict = {}
+    __reduceList = []
 
-class WordFilter(object):
-    isInitialization = False
+    def __init__(self):
+        db = sqlite3.connect(WordFilter.__dataFile)
 
-    @staticmethod
-    def init():
-        if not WordFilter.isInitialization:
-            db = sqlite3.connect('db/word_filter.db')
-
-            with db:
-                WordFilter.createTable(db)
-
-                cursor = db.cursor()
-                rv = cursor.execute('select * from extend_words')
-                global _extendDict
-                _extendDict = {x: y for x, y in rv}
-
-                rv = cursor.execute('select * from reduce_words')
-
-                global _reduceList
-                _reduceList = [x for x in rv]
-
-                cursor.close()
-
-            WordFilter.isInitialization = True
-
-    @staticmethod
-    def createTable(db):
-        with open('db/schema/word_filter.sql', encoding='utf-8', mode='r') as f:
+        with db:
+            WordFilter.__createTable(db)
             cursor = db.cursor()
-            cursor.executescript(f.read())
-            db.commit()
+
+            rv = cursor.execute('select * from extend_words')
+            WordFilter.__extendDict = {x: y for x, y in rv}
+
+            rv = cursor.execute('select text from reduce_words')
+            WordFilter.__reduceList = [x[0] for x in rv]
+
             cursor.close()
 
-    @staticmethod
-    def get_extend_word_dict():
-        if not WordFilter.isInitialization:
-            WordFilter.init()
-        return _extendDict
+    def get_extend_word_dict(self, params=None):
+        return WordFilter.__extendDict
 
-    @staticmethod
-    def add_extend_word(match_text, text):
-        with sqlite3.connect('db/word_filter.db') as db:
-            WordFilter.createTable(db)
+    def get_reduce_word_list(self, params=None):
+        return WordFilter.__reduceList
+
+    def add_extend_word(self, match_text, text, params=None):
+        with sqlite3.connect(WordFilter.__dataFile) as db:
+            WordFilter.__createTable(db)
 
             cursor = db.cursor()
-            rv = cursor.execute('insert or replace into extend_words values(:match_text, :text)',
+            cursor.execute('insert or replace into extend_words values(:match_text, :text)',
                                 {'match_text': match_text, 'text': text})
 
             db.commit()
             cursor.close()
 
-            WordFilter.isInitialization = False
-            WordFilter.init()
+            self.__init__()
 
-    @staticmethod
-    def get_reduce_word_list():
-        if not WordFilter.isInitialization:
-            WordFilter.init()
-
-        return _reduceList
-
-    @staticmethod
-    def add_reduce_word(text):
-        with sqlite3.connect('db/word_filter.db') as db:
-            WordFilter.createTable(db)
+    def add_reduce_word(self, text, params=None):
+        with sqlite3.connect(WordFilter.__dataFile) as db:
+            WordFilter.__createTable(db)
 
             cursor = db.cursor()
-            rv = cursor.execute('insert or replace into reduce_words values(:text)', {'text': text})
+            cursor.execute('insert or replace into reduce_words values(:text)', {'text': text})
 
             db.commit()
             cursor.close()
 
-            WordFilter.isInitialization = False
-            WordFilter.init()
+            self.__init__()
+
+    @classmethod
+    def __createTable(cls, db):
+        with open(cls.__schemaFile, encoding='utf-8', mode='r') as f:
+            cursor = db.cursor()
+            cursor.executescript(f.read())
+            db.commit()
+            cursor.close()
 
 
-class WordRelationship(object):
+class WordRelationship(DataApi.AbsWordRelationship):
+    __model_file = 'db/word2vec.model'
+    __model = None
+
     def __init__(self):
         pass
 
-    def get_relationship_list(self):
+    @classmethod
+    def run_word2vec(cls):
+        import model.word2vec as wv
+        sentences = []
+
+        WordRelationship.__model = wv.run_word2vec(WordRelationship.__model_file, sentences, None)
         pass
 
-    def add_relationship(self, source, target, frequency):
-        pass
+    def get_similar_list(self, keyword, result_count, params=None):
+        if not os.path.isfile(WordRelationship.__model_file):
+            WordRelationship.run_word2vec()
+
+        if keyword not in WordRelationship.__model:
+            return []
+
+        return WordRelationship.__model.most_similar(keyword, topn=result_count)
 
 
-class WordPool(object):
+class WordPool(DataApi.AbsWordPool):
+    __data_path = 'db/pool'
+    __data_set = []
+
     def __init__(self):
-        pass
+        file_list = list(filter(lambda f: os.path.isfile(os.path.join(WordPool.__data_path, f)),
+                                os.listdir(WordPool.__data_path)))
 
-    def get_word_pool_list(self):
-        pass
+        for file in file_list:
+            with open(os.path.join(WordPool.__data_path, file), mode='r', encoding='utf-8') as f:
+                WordPool.__data_set.append(f.read())
+        # pass
 
-    def add_word_pool(self, text):
+    def get_word_pool_list(self, params=None):
+        if 'data_count' in params:
+            print('data_count', params['data_count'])
+            return WordPool.__data_set[:params['data_count']]
+
+        return WordPool.__data_set
+
+    def add_word_pool(self, text, params=None):
+        WordPool.__data_set.append(text)
         pass

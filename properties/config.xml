@@ -2,13 +2,25 @@
 <properties>
     <nlp-handler package-path="util.nlp" method-name="nlp_twitter" />
     <data-handler>
-        <word_pool package-path="util.data_handler" class-name="WordPool" />
-        <word_filter package-path="util.data_handler" class-name="WordFilter" />
-        <word_relationship package-path="util.data_handler" class-name="WordRelationship" />
+        <WordPool package-path="util.data_handler" class-name="WordPool" />
+        <WordFilter package-path="util.data_handler" class-name="WordFilter" />
+        <wordRelationship package-path="util.data_handler" class-name="WordRelationship" />
     </data-handler>
     <api-handler>
-        <api package-path="api.SearchTopics" class-name="SearchTopic" service-url="/searchTopic" />
-        <api package-path="api.TopicCloud" class-name="TopicCloud" service-url="/topicCloud" />
-        <api package-path="api.TopicNetwork" class-name="TopicNetwork" service-url="/topicNetwork" />
+        <api package-path="api.SearchTopics" class-name="SearchTopic" service-url="/searchTopic" endpoint="searchtopic">
+            <params type="GET">
+                <param name="text" dest="" default="" type="" required="True" action="" help=""/>
+                <param name="search_line" dest="" default="" type="int" required="" action="" help=""/>
+                <param name="result_count" dest="" default="5" type="int" required="" action="" help=""/>
+            </params>
+        </api>
+        <api package-path="api.TopicCloud" class-name="TopicCloud" service-url="/topicCloud" endpoint="topiccloud">
+            <params type="GET">
+                <param name="data_count" dest="" default="100" type="int" required="" action="" help=""/>
+                <param name="result_count" dest="" default="20" type="int" required="" action="" help=""/>
+            </params>
+        </api>
+        <!--<api package-path="api.TopicNetwork" class-name="TopicNetwork" service-url="/topicNetwork">-->
+        <!--</api>-->
     </api-handler>
 </properties>
