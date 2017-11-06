@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import importlib
 import traceback
+
 from time import strftime
 from xml.etree import ElementTree
 
@@ -22,6 +23,17 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+    # import datetime
+    # response.headers.add('Last-Modified', datetime.datetime.now())
+    # response.headers.add('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0')
+    # response.headers.add('Pragma', 'no-cache')
+    # response.headers.add('Expires', '0')
+
+    # response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    # response.headers["Pragma"] = "no-cache"
+    # response.headers["Expires"] = "0"
+    # response.headers['Cache-Control'] = 'public, max-age=0'
+
     return response
 
 @app.teardown_appcontext
@@ -42,6 +54,17 @@ def exceptions(e):
                  tb)
 
     return "Internal Server Error", 500
+
+# @app.template_filter('autoversion')
+# def autoversion_filter(filename):
+#     fullpath = filename[1:]
+#     try:
+#         timestamp = str(os.path.getmtime(fullpath))
+#     except OSError:
+#         return filename
+#
+#     newfilename = "{0}?v={1}".format(filename, timestamp)
+#     return newfilename
 
 def main():
     config = ElementTree.parse('properties/config.xml')
@@ -76,7 +99,24 @@ def main():
         cls = getattr(mod, attr['class-name'])
         api.add_resource(cls, attr['service-url'], endpoint=attr['endpoint'], resource_class_kwargs={'parameters': parameters})
 
+    web_prop = config.find('web-handler')
+    web_attr = web_prop.attrib
+    mod = importlib.import_module(web_attr['package-path'])
+    init_cls = getattr(mod, web_attr['init-method-name'])
+
+    if web_attr['template-folder']:
+        app.template_folder = web_attr['template-folder']
+
+    if web_attr['static-folder']:
+        app.static_folder = web_attr['static-folder']
+
+    if web_attr['auto-reload'] and web_attr['auto-reload'].upper():
+        app.jinja_env.auto_reload = app.config['TEMPLATES_AUTO_RELOAD'] = True
+
+    init_cls(app)
+
 
 if __name__ == '__main__':
     main()
-    app.run(host='0.0.0.0', port=7777, debug=True)
+    app.run(host='0.0.0.0', port=9000, debug=True, threaded=True)
+    # app.run(host='0.0.0.0', port=9000, debug=True)

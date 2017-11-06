@@ -4,11 +4,11 @@
     <data-handler>
         <WordPool package-path="util.data_handler" class-name="WordPool" />
         <WordFilter package-path="util.data_handler" class-name="WordFilter" />
-        <wordRelationship package-path="util.data_handler" class-name="WordRelationship" />
+        <WordRelationship package-path="util.data_handler" class-name="WordRelationship" />
     </data-handler>
     <api-handler>
         <api package-path="api.SearchTopics" class-name="SearchTopic" service-url="/searchTopic" endpoint="searchtopic">
-            <params type="GET">
+            <params type="POST">
                 <param name="text" dest="" default="" type="" required="True" action="" help=""/>
                 <param name="search_line" dest="" default="" type="int" required="" action="" help=""/>
                 <param name="result_count" dest="" default="5" type="int" required="" action="" help=""/>
@@ -16,11 +16,23 @@
         </api>
         <api package-path="api.TopicCloud" class-name="TopicCloud" service-url="/topicCloud" endpoint="topiccloud">
             <params type="GET">
-                <param name="data_count" dest="" default="100" type="int" required="" action="" help=""/>
+                <param name="data_count" dest="" default="" type="int" required="" action="" help=""/>
                 <param name="result_count" dest="" default="20" type="int" required="" action="" help=""/>
             </params>
         </api>
-        <!--<api package-path="api.TopicNetwork" class-name="TopicNetwork" service-url="/topicNetwork">-->
-        <!--</api>-->
+        <api package-path="api.TopicNetwork" class-name="TopicNetwork" service-url="/topicNetwork" endpoint="topicnetwork">
+            <params type="GET">
+                <param name="keyword" dest="" default="" type="" required="True" action="" help=""/>
+                <param name="result_count" dest="" default="20" type="int" required="" action="" help=""/>
+            </params>
+        </api>
+        <api package-path="api.ThemeSentence" class-name="ThemeSentence" service-url="/themeSentence" endpoint="themesentence">
+            <params type="POST">
+                <param name="corpus" dest="" default="" type="" required="True" action="" help=""/>
+                <param name="result_count" dest="" default="2" type="int" required="" action="" help=""/>
+            </params>
+        </api>
     </api-handler>
+    <web-handler package-path="sample.routes" init-method-name="init" template-folder="sample/templates"
+                 static-folder="sample/static" auto-reload="True"/>
 </properties>

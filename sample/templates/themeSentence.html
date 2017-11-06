@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block content %}
+<form action="{{ url_for('web/themeSentence') }}" method="post">
+    <textarea class="corpus" name="corpus">{{ corpus }}</textarea>
+    <div class="condition">
+        <label>추출 개수</label><input type="number" class="result_count" name="result_count" value="{{ result_count|default('2') }}"><input type="submit" value="주제문장 추출">
+    </div>
+</form>
+<div class="result">
+    <label>결과</label>
+    <ol>
+        {% for sentence in sentences %}
+        <li>{{ sentence }}</li>
+        {% endfor %}
+    </ol>
+</div>
+{% endblock %}

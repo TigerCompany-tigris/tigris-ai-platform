@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
+
 import sqlite3
 import os
 from interface import DataApi
-from gensim.models import Word2Vec
 
 class WordFilter(DataApi.AbsWordFilter):
     __dataFile = 'db/word_filter.db'
@@ -71,24 +71,22 @@ class WordRelationship(DataApi.AbsWordRelationship):
     __model = None
 
     def __init__(self):
-        pass
-
-    @classmethod
-    def run_word2vec(cls):
-        import model.word2vec as wv
-        sentences = []
-
-        WordRelationship.__model = wv.run_word2vec(WordRelationship.__model_file, sentences, None)
-        pass
+        from model import word2vec as wv
+        WordRelationship.__model = wv.get_model(WordRelationship.__model_file)
+        # pass
 
     def get_similar_list(self, keyword, result_count, params=None):
-        if not os.path.isfile(WordRelationship.__model_file):
-            WordRelationship.run_word2vec()
+        results = WordRelationship.__model.most_similar(keyword, topn=result_count)
 
-        if keyword not in WordRelationship.__model:
-            return []
+        results = [{'keyword': result[0], 'frequency': result[1]} for result in results]
+        return sorted(results, key=lambda x: x['frequency'], reverse=True)
+        # pass
 
-        return WordRelationship.__model.most_similar(keyword, topn=result_count)
+    # @classmethod
+    # def run_model(cls):
+    #     from model import word2vec as wv
+    #     WordRelationship.__model = wv.run_model(WordRelationship.__model_file)
+    #     # pass
 
 
 class WordPool(DataApi.AbsWordPool):
@@ -99,14 +97,14 @@ class WordPool(DataApi.AbsWordPool):
         file_list = list(filter(lambda f: os.path.isfile(os.path.join(WordPool.__data_path, f)),
                                 os.listdir(WordPool.__data_path)))
 
+        WordPool.__data_set = []
         for file in file_list:
             with open(os.path.join(WordPool.__data_path, file), mode='r', encoding='utf-8') as f:
                 WordPool.__data_set.append(f.read())
         # pass
 
     def get_word_pool_list(self, params=None):
-        if 'data_count' in params:
-            print('data_count', params['data_count'])
+        if params and 'data_count' in params and params['data_count']:
             return WordPool.__data_set[:params['data_count']]
 
         return WordPool.__data_set

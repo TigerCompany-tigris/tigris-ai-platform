@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
-
-from flask_restful import reqparse
-
 from interface.BaseApi import BaseApi
 
-
 class SearchTopic(BaseApi):
-    def get(self):
+    def post(self):
         text = self.params['text']
         rtn = {'topics': []}
 

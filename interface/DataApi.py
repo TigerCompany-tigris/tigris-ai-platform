@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import abc
 
-class AbsWordPool(metaclass=abc.ABCMeta):
+class AbsWordPool():
     """
     유사어 추출등에서 사용할 데이터 Abstract Class
     """
@@ -27,7 +27,7 @@ class AbsWordPool(metaclass=abc.ABCMeta):
         raise NotImplementedError()
 
 
-class AbsWordFilter(metaclass=abc.ABCMeta):
+class AbsWordFilter():
     """
     데이터(문장)에서 별도의 단어 처리 Abstract Class
     """
@@ -70,7 +70,7 @@ class AbsWordFilter(metaclass=abc.ABCMeta):
         pass
 
 
-class AbsWordRelationship(metaclass=abc.ABCMeta):
+class AbsWordRelationship():
     @abc.abstractmethod
     def __init__(self):
         raise NotImplementedError()
@@ -102,7 +102,8 @@ class DataApi(object):
 
     @WordPool.setter
     def WordPool(self, cls: AbsWordPool):
-        DataApi.__wordPool = cls()
+        obj = cls()
+        DataApi.__wordPool = obj
 
     @property
     def WordRelationship(self) -> AbsWordRelationship:

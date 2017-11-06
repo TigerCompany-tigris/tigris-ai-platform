@@ -138,7 +138,9 @@ def decorators(f):
         if kwargs:
             f.__self__.params.update(kwargs)
         return f(*args)
+
     return func_wrapper
+
 
 class BaseApi(Resource):
     method_decorators = [decorators]
@@ -158,11 +160,16 @@ class BaseApi(Resource):
             paramList = parameters[request.method]
 
             def param_parser(default, param):
-                default.update({k: v for k, v in param.items() if v})
-                default['type'] = eval(default['type'])
-                default['required'] = bool(default['required'])
-                default['default'] = default['type'](default['default'])
+                default.update({x: y for x, y in filter(lambda o: o[1], param.items())})
 
+                if 'type' in param and param['type']:
+                    default['type'] = eval(default['type'])
+
+                if 'requited' in param and param['requited']:
+                    default['requited'] = bool(default['requited'])
+
+                if 'default' in param and param['default']:
+                    default['default'] = default['type'](default['default'])
                 return default
 
             parser = reqparse.RequestParser()

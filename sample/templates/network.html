@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="condition">
+    <label>검색 키워드</label><input type="text" id="keyword">
+    <label>결과 갯수</label><input type="number" id="result_count" value="20">
+    <input type="button" value="생성" onclick="showKeywordMapChart()">
+</div>
+<div id="network" class="network">
+    <img id="loading" src="{{ url_for('static', filename='img/loading.gif') }}" alt="loading" />
+</div>
+
+<script src="{{ url_for('static', filename='js/jquery-2.2.2.min.js') }}" ></script>
+<script src="{{ url_for('static', filename='js/d3.v3.min.js') }}" ></script>
+<script src="{{ url_for('static', filename='js/d3.layout.cloud.js') }}" ></script>
+<script type="text/javascript">
+    function showKeywordMapChart() {
+        var layerId = '#network';
+        var loading = $('#loading')
+        loading.css('display', 'block');
+        $(layerId).find('svg').remove();
+        var keyword = $('#keyword').val();
+        var result_count = $('#result_count').val();
+       var dataUrl = "/topicNetwork?keyword=" + keyword + "&result_count=" + result_count;
+
+        var width = 770, height = 475;
+
+        d3.json(dataUrl, function (data) {
+            loading.css('display', 'none');
+            var links = [];
+            var nodes = {};
+            nodes[keyword] = {'name': keyword}
+
+            for(var i=0; i < data.length ; i++) {
+                var d1 = data[i];
+                link = {
+                    'source': nodes[d1.keyword] || (nodes[d1.keyword] = {name: d1.keyword}),
+                    'target': nodes[keyword],
+                    'score': i+1
+                };
+                links[i] = link;
+            }
+
+            var force = d3.layout.force()
+                .nodes(d3.values(nodes))
+                .links(links)
+                .size([width, height])
+                .linkDistance(function(d) {
+                    var distance = Number(d.score) * 10 +23;
+                    return distance;
+                })
+                .charge(function(d) {
+                    var value = -800;
+                    if( d.name !== keyword ) {
+                        value = -400;
+                    }
+                    return value;
+                })
+                .on("tick", tick)
+                .start();
+
+            var svg = d3.select(layerId).append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .attr("overflow", 'hidden');
+
+            var link = svg.selectAll(".link")
+                .data(force.links())
+                .enter().append("line")
+                .attr("stroke", "#b1b1b1")
+                .attr("stroke-width", "0.5px");
+
+            var node = svg.selectAll(".node")
+                .data(force.nodes())
+                .enter().append("g")
+                .attr("class", "node")
+                .call(force.drag);
+
+            var nodeShape = node.append("rect")
+                .attr({
+                    'class': 'node-shape',
+                    'rx':'5px',
+                    'ry':'5px',
+                    'y': '-11.5px',
+                    'height': 23,
+                    "visibility": "visible"
+                })
+                .style("fill", "#fff")
+                .style('stroke', function(d){
+                    if(d.name === keyword) return "#007edf";
+                    else return "#9898a7";
+                })
+                .style('stroke-width','2px')
+                .style('fill', function(d){
+                    if(d.name === keyword) return "#007edf";
+                    else return "#9898a7";
+                });
+
+            node.append("text")
+                .attr("x", 12)
+                .attr("dy", ".35em")
+                .style('text-anchor','middle')
+                .style('fill','#FFF')
+                .text(function(d) { return d.name; });
+
+            node.selectAll("text").each(function (d) {
+                d.width = this.getBBox().width;
+                d.height = this.getBBox().height;
+            });
+            nodeShape.attr('width', function(d) {return d.width + 10; });
+            nodeShape.attr('x', function(d) { return -( (d.width+10)/2 - 12); });
+
+            function tick() {
+                link.attr("x1", function(d) { return d.source.x; })
+                    .attr("y1", function(d) { return d.source.y; })
+                    .attr("x2", function(d) { return d.target.x; })
+                    .attr("y2", function(d) { return d.target.y; });
+
+                node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+            }
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>tigris-ai-platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <header>
+        <h1 class="logo">tigris AI Platform</h1>
+    </header>
+
+    <nav class="menu">
+        <ul>
+            <li><a href="{{ url_for('web/topicWord') }}">주제어 추출</a></li>
+            <li><a href="{{ url_for('web/themeSentence') }}">주제문장 추출</a></li>
+            <li><a href="{{ url_for('web/cloud') }}">워드클라우드</a></li>
+            <li><a href="{{ url_for('web/network') }}">키워드 네크워크</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>
