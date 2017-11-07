@@ -5,8 +5,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
-    <header>
-        <h1 class="logo">tigris AI Platform</h1>
+    <header class="logo">
+        <h1><div class="home"><a href="{{ url_for('web/home') }}">Tigris AI Platform</a></div><div class="title">{% block title %}Main{% endblock %}</div></h1>
     </header>
 
     <nav class="menu">

@@ -73,20 +73,12 @@ class WordRelationship(DataApi.AbsWordRelationship):
     def __init__(self):
         from model import word2vec as wv
         WordRelationship.__model = wv.get_model(WordRelationship.__model_file)
-        # pass
 
     def get_similar_list(self, keyword, result_count, params=None):
         results = WordRelationship.__model.most_similar(keyword, topn=result_count)
 
         results = [{'keyword': result[0], 'frequency': result[1]} for result in results]
         return sorted(results, key=lambda x: x['frequency'], reverse=True)
-        # pass
-
-    # @classmethod
-    # def run_model(cls):
-    #     from model import word2vec as wv
-    #     WordRelationship.__model = wv.run_model(WordRelationship.__model_file)
-    #     # pass
 
 
 class WordPool(DataApi.AbsWordPool):
@@ -101,7 +93,6 @@ class WordPool(DataApi.AbsWordPool):
         for file in file_list:
             with open(os.path.join(WordPool.__data_path, file), mode='r', encoding='utf-8') as f:
                 WordPool.__data_set.append(f.read())
-        # pass
 
     def get_word_pool_list(self, params=None):
         if params and 'data_count' in params and params['data_count']:
@@ -111,4 +102,8 @@ class WordPool(DataApi.AbsWordPool):
 
     def add_word_pool(self, text, params=None):
         WordPool.__data_set.append(text)
-        pass
+
+        import uuid
+        filename = str(uuid.uuid4()) + '.txt'
+        with open(os.path.join(WordPool.__data_path, filename), mode='w', encoding='utf-8') as f:
+            f.write(text)

@@ -12,6 +12,7 @@
                 <param name="text" dest="" default="" type="" required="True" action="" help=""/>
                 <param name="search_line" dest="" default="" type="int" required="" action="" help=""/>
                 <param name="result_count" dest="" default="5" type="int" required="" action="" help=""/>
+                <param name="data_save" dest="" default="N" type="" required="" action="" help=""/>
             </params>
         </api>
         <api package-path="api.TopicCloud" class-name="TopicCloud" service-url="/topicCloud" endpoint="topiccloud">
@@ -30,6 +31,7 @@
             <params type="POST">
                 <param name="corpus" dest="" default="" type="" required="True" action="" help=""/>
                 <param name="result_count" dest="" default="2" type="int" required="" action="" help=""/>
+                <param name="data_save" dest="" default="N" type="" required="" action="" help=""/>
             </params>
         </api>
     </api-handler>

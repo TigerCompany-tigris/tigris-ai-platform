@@ -8,23 +8,30 @@ class ThemeSentence(BaseApi):
         import jpype
         if jpype.isJVMStarted():
             jpype.attachThreadToJVM()
-
+        result = []
         corpus = self.params['corpus']
-        result_count = self.params['result_count']
-        config = {
-            # 'useful_tags': ['Noun', 'Verb', 'Adjective', 'Determiner', 'Adverb', 'Conjunction', 'Josa', 'PreEomi',
-            #                 'Eomi', 'Suffix', 'Alpha', 'Number'],
-            'useful_tags': ['Noun', 'ProperNoun'],
-            'delimiters': ['. ', '\r\n', '.\r\n', '\n', '.\n'],
-            'min_token_length': 5
-        }
 
-        lexRank = LexRank(**config)
-        lexRank.summarize(corpus)
+        if corpus:
+            result_count = self.params['result_count']
+            data_save = self.params['data_save']
 
-        result_count = min(result_count, lexRank.num_sentences-1)
-        if result_count == 0:
-            result_count = 1
+            if data_save.upper() == 'Y':
+                self.getDataApi().WordPool.add_word_pool(corpus)
 
+            config = {
+                # 'useful_tags': ['Noun', 'Verb', 'Adjective', 'Determiner', 'Adverb', 'Conjunction', 'Josa', 'PreEomi',
+                #                 'Eomi', 'Suffix', 'Alpha', 'Number'],
+                'useful_tags': ['Noun', 'ProperNoun'],
+                'min_token_length': 5
+            }
 
-        return lexRank.probe(result_count)
+            lexRank = LexRank(**config)
+            lexRank.summarize(corpus)
+
+            result_count = min(result_count, lexRank.num_sentences-1)
+            if result_count == 0:
+                result_count = 1
+
+            result = lexRank.probe(result_count)
+
+        return result

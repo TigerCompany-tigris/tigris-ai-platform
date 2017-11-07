@@ -9,6 +9,10 @@ class SearchTopic(BaseApi):
         if text:
             result_count = int(self.params['result_count'])
             search_line = self.params['search_line']
+            data_save = self.params['data_save']
+
+            if data_save.upper() == 'Y':
+                self.getDataApi().WordPool.add_word_pool(text)
 
             text_lines = list(filter(lambda l: l, text.splitlines()))
 

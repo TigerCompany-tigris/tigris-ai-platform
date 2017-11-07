@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-import copy
-import numpy as np, re
+import numpy as np
 import re
 from collections import Counter
 from functools import wraps
 from itertools import chain
-
 from flask import request
 from flask_restful import Resource, reqparse
 from gensim import corpora, models

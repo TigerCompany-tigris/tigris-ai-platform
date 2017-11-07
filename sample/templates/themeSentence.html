@@ -1,17 +1,49 @@
 {% extends "layout.html" %}
+{% block title %}주제문장 추출{% endblock %}
 {% block content %}
-<form action="{{ url_for('web/themeSentence') }}" method="post">
-    <textarea class="corpus" name="corpus">{{ corpus }}</textarea>
-    <div class="condition">
-        <label>추출 개수</label><input type="number" class="result_count" name="result_count" value="{{ result_count|default('2') }}"><input type="submit" value="주제문장 추출">
-    </div>
-</form>
+<textarea id="corpus" class="corpus" name="corpus"></textarea>
+<div class="condition">
+    <label>자료 저장 여부</label><input type="checkbox" id="data_save">
+    <label>추출 개수</label><input type="number" id="result_count" class="result_count" name="result_count" value="2">
+    <input type="button" onclick="run()" value="주제문장 추출">
+</div>
 <div class="result">
     <label>결과</label>
-    <ol>
-        {% for sentence in sentences %}
-        <li>{{ sentence }}</li>
-        {% endfor %}
+    <ol id="result">
     </ol>
 </div>
+
+<script src="{{ url_for('static', filename='js/jquery-2.2.2.min.js') }}" ></script>
+<script type="text/javascript">
+    function run() {
+        var resultObj = $("#result"), corpus = $("#corpus").val(),
+            result_count = $("#result_count").val(), data_save = $("#data_save").is(':checked')? "Y" : "N";
+
+        if(!corpus) {
+            alert("입력된 내용이 없습니다.");
+            $("#corpus").focus();
+            return;
+        }
+
+        if(!result_count || result_count < 1) {
+            alert("출력 결과는 최소 1개입니다.");
+            $("#result_count").focus();
+            return;
+        }
+
+        resultObj.empty();
+
+        params = {
+            "corpus": corpus,
+            "result_count": result_count,
+            "data_save": data_save
+        };
+        $.post('/themeSentence', params, function(data, textStatus, jqXhr) {
+            data.forEach(function(entry) {
+                resultObj.append("<li>"+entry+"</li>");
+            });
+        });
+    }
+</script>
+
 {% endblock %}
